@@ -1,8 +1,7 @@
 name: Auto Sync Subscription
 
 on:
-  schedule:
-    - cron: '0 */1 * * *'
+  # فقط اجرای دستی با کلیک روی Run workflow
   workflow_dispatch:
 
 permissions:
