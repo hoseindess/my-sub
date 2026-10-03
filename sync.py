@@ -18,10 +18,10 @@ def process_line(line, index_num):
     if not line or line.startswith("//"):
         return ""
 
-    # فرمت نام‌گذاری: عدد بدون صفر پیش‌فرض + ایموجی کلید
-    name_str = f"{index_num}🔑"
+    # فرمت نام‌گذاری جدید: ایموجی کلید قبل از عدد (🔑1, 🔑2, ...)
+    name_str = f"🔑{index_num}"
 
-    # پردازش لینک‌های VMess (تنظیم مقدار ps به فرمت عدد🔑)
+    # پردازش لینک‌های VMess (تنظیم مقدار ps به فرمت 🔑عدد)
     if line.startswith("vmess://"):
         try:
             b64_part = line[8:]
@@ -41,7 +41,7 @@ def process_line(line, index_num):
             base_url = line.split("#")[0]
             return f"{base_url}#{name_str}"
 
-    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (جایگزینی بخش بعد از # با عدد🔑)
+    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (جایگزینی بخش بعد از # با 🔑عدد)
     base_url = line.split("#")[0]
     return f"{base_url}#{name_str}"
 
@@ -78,7 +78,7 @@ if not any(
 if not lines:
     lines = text.splitlines()
 
-# تغییر نام تمام خطوط به فرمت 1🔑, 2🔑, ...
+# تغییر نام تمام خطوط به فرمت 🔑1, 🔑2, ...
 cleaned_lines = []
 counter = 1
 
@@ -107,6 +107,6 @@ current_hash = hashlib.sha256(current_bytes).hexdigest()
 if new_hash != current_hash:
     with open(OUTPUT_FILE, "wb") as f:
         f.write(final_bytes)
-    print("محتوای کانفیگ‌ها دریافت و نام تمامی آن‌ها به فرمت 'عدد🔑' تغییر یافت.")
+    print("محتوای کانفیگ‌ها دریافت و نام تمامی آن‌ها به فرمت '🔑عدد' تغییر یافت.")
 else:
     print("هیچ تغییری در سابسکریپشن ورودی رخ نداده است.")
