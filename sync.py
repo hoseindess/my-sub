@@ -18,10 +18,10 @@ def process_line(line, index_num):
     if not line or line.startswith("//"):
         return ""
 
-    # تبدیل شماره ترتیبی به رشته متنی
-    name_str = str(index_num)
+    # فرمت نام‌گذاری: عدد بدون صفر پیش‌فرض + ایموجی کلید
+    name_str = f"{index_num}🔑"
 
-    # پردازش لینک‌های VMess (تنظیم مقدار ps به شماره عدد)
+    # پردازش لینک‌های VMess (تنظیم مقدار ps به فرمت عدد🔑)
     if line.startswith("vmess://"):
         try:
             b64_part = line[8:]
@@ -31,7 +31,7 @@ def process_line(line, index_num):
             decoded_bytes = base64.b64decode(b64_part)
             data = json.loads(decoded_bytes.decode("utf-8", errors="ignore"))
 
-            # جایگزینی نام کانفیگ با شماره عدد
+            # جایگزینی نام کانفیگ
             data["ps"] = name_str
 
             new_json = json.dumps(data, ensure_ascii=False)
@@ -41,7 +41,7 @@ def process_line(line, index_num):
             base_url = line.split("#")[0]
             return f"{base_url}#{name_str}"
 
-    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (جایگزینی بخش بعد از # با شماره)
+    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (جایگزینی بخش بعد از # با عدد🔑)
     base_url = line.split("#")[0]
     return f"{base_url}#{name_str}"
 
@@ -78,7 +78,7 @@ if not any(
 if not lines:
     lines = text.splitlines()
 
-# تغییر نام تمام خطوط به شماره‌های ترتیبی
+# تغییر نام تمام خطوط به فرمت 1🔑, 2🔑, ...
 cleaned_lines = []
 counter = 1
 
@@ -107,6 +107,6 @@ current_hash = hashlib.sha256(current_bytes).hexdigest()
 if new_hash != current_hash:
     with open(OUTPUT_FILE, "wb") as f:
         f.write(final_bytes)
-    print("محتوای کانفیگ‌ها دریافت و نام تمامی آن‌ها به شماره ترتیبی عددی تغییر یافت.")
+    print("محتوای کانفیگ‌ها دریافت و نام تمامی آن‌ها به فرمت 'عدد🔑' تغییر یافت.")
 else:
     print("هیچ تغییری در سابسکریپشن ورودی رخ نداده است.")
