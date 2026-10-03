@@ -1,0 +1,33 @@
+name: Auto Sync Subscription
+
+on:
+  schedule:
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run Script
+        env:
+          INPUT_SUB_URL: ${{ secrets.INPUT_SUB_URL }}
+        run: python sync.py
+
+      - name: Commit and Push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add sub.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update sub.txt" && git push)
