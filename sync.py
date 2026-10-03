@@ -13,12 +13,15 @@ if not INPUT_URL:
     sys.exit(1)
 
 
-def clean_line(line):
+def process_line(line, index_num):
     line = line.strip()
     if not line or line.startswith("//"):
         return ""
 
-    # پردازش لینک‌های VMess (حذف مقدار ps از داخل JSON)
+    # تبدیل شماره ترتیبی به رشته متنی
+    name_str = str(index_num)
+
+    # پردازش لینک‌های VMess (تنظیم مقدار ps به شماره عدد)
     if line.startswith("vmess://"):
         try:
             b64_part = line[8:]
@@ -28,20 +31,19 @@ def clean_line(line):
             decoded_bytes = base64.b64decode(b64_part)
             data = json.loads(decoded_bytes.decode("utf-8", errors="ignore"))
 
-            # پاک کردن نام/ملاحظات کانفیگ
-            data["ps"] = ""
+            # جایگزینی نام کانفیگ با شماره عدد
+            data["ps"] = name_str
 
             new_json = json.dumps(data, ensure_ascii=False)
             new_b64 = base64.b64encode(new_json.encode("utf-8")).decode("utf-8")
             return f"vmess://{new_b64}"
         except Exception:
-            return line.split("#")[0]
+            base_url = line.split("#")[0]
+            return f"{base_url}#{name_str}"
 
-    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (حذف بخش بعد از #)
-    if "#" in line:
-        return line.split("#")[0]
-
-    return line
+    # پردازش VLESS, Trojan, SS, Hysteria2, TUIC (جایگزینی بخش بعد از # با شماره)
+    base_url = line.split("#")[0]
+    return f"{base_url}#{name_str}"
 
 
 # دانلود محتوای سابسکریپشن ورودی
@@ -76,12 +78,19 @@ if not any(
 if not lines:
     lines = text.splitlines()
 
-# حذف اسامی از تمامی خطوط
+# تغییر نام تمام خطوط به شماره‌های ترتیبی
 cleaned_lines = []
+counter = 1
+
 for line in lines:
-    c = clean_line(line)
-    if c:
-        cleaned_lines.append(c)
+    line_str = line.strip()
+    if not line_str or line_str.startswith("//"):
+        continue
+
+    processed_config = process_line(line_str, counter)
+    if processed_config:
+        cleaned_lines.append(processed_config)
+        counter += 1
 
 final_content = "\n".join(cleaned_lines) + "\n"
 final_bytes = final_content.encode("utf-8")
@@ -98,6 +107,6 @@ current_hash = hashlib.sha256(current_bytes).hexdigest()
 if new_hash != current_hash:
     with open(OUTPUT_FILE, "wb") as f:
         f.write(final_bytes)
-    print("محتوای کانفیگ‌ها دریافت، تمامی اسامی حذف و فایل بروزرسانی شد.")
+    print("محتوای کانفیگ‌ها دریافت و نام تمامی آن‌ها به شماره ترتیبی عددی تغییر یافت.")
 else:
     print("هیچ تغییری در سابسکریپشن ورودی رخ نداده است.")
